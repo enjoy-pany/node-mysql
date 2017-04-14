@@ -1,0 +1,163 @@
+<!DOCTYPE html>
+<html>
+<head>
+	<title>test node-mysql</title>
+	<meta charset="utf-8">
+	<style>
+		.alert-success{
+			display: none;
+		}
+	</style>
+	<link rel="stylesheet" href="lib/bootstrap.min.css">
+	<script src='lib/jquery-2.1.0.js'></script>
+</head>
+<body>
+<div class="container" id="unameGroup">
+	<form>
+	  <div class="col-lg-6">
+	  	<h3 class="page-header">AC自助约课平台</h3>
+	  	<div class="form-group">
+	  		<label for="exampleInputEmail1">Input user_name for t_id:</label>
+		    <div class="input-group">
+		      <input type="text" id='s_tID' class="form-control" placeholder="user_name for teacher">
+		      <span class="input-group-btn">
+		        <button id='t_btn' class="btn btn-default" type="button">Go!</button>
+		      </span>
+		    </div>
+		    <div class="alert alert-success  tId" role="alert"></div>
+	  	</div>
+	  	<div class="form-group">
+	  		<label for="exampleInputEmail1">Input user_name for s_id:</label>
+		    <div class="input-group">
+		      <input type="text" id='s_sID' class="form-control" placeholder="user_name for student">
+		      <span class="input-group-btn">
+		        <button id='s_btn' class="btn btn-default" type="button">Go!</button>
+		      </span>
+		    </div>
+		    <div class="alert alert-success sId" role="alert"></div>
+	  	</div>
+	    <div class="form-group">
+	      <label for="exampleInputEmail1">start_time:</label>
+	      <input type="datetime-local" class="form-control" id="start_time" placeholder="start_time">
+	    </div>
+	    <div class="form-group">
+	      <label for="exampleInputPassword1">end_time:</label>
+	      <input type="datetime-local" class="form-control" id="end_time" placeholder="end_time">
+	    </div>
+	    <div class="form-group">
+	      <label for="exampleInputPassword1">date_time:</label>
+	      <input type="text" class="form-control" id="date_time" placeholder="20170306_24">
+	    </div>
+	    <div class="form-group">
+	      <label for="exampleInputPassword1">t_id:</label>
+	      <input type="text" class="form-control" id="t_id" placeholder="老师ID">
+	    </div>
+	    <div class="form-group">
+	      <label for="exampleInputPassword1">s_id:</label>
+	      <input type="text" class="form-control" id="s_id" placeholder="学生ID">
+	    </div>
+	    <div class="form-group">
+	      <label for="exampleInputPassword1">course_id:</label>
+	      <input type="text" class="form-control" id="course_id" placeholder="课程ID">
+	    </div>
+	  <button id='btn' type="button" class="btn btn-default">Submit</button>
+	  </div>
+	</form>
+</div>
+</body>
+<script type="text/javascript">
+$(function(){
+var domain = 'http://172.16.4.133:3000/users/';
+//约课
+$('#btn').on('click',function(){
+	var _data = init();
+	console.log(_data)
+	$.ajax({
+     	url: domain + 'updateUser',
+     	type: 'POST',
+     	data:_data,
+     	success: function(res) {
+ 			console.log(res);
+ 			if(res.code === 200){
+ 				alert(res.msg);
+ 			}else if(res.affectedRows == 0){
+ 				alert('你输入的条件有误，请检查后重新输入！')
+ 			}else{
+ 				alert('更新失败！')
+ 			}
+ 		},
+ 		error: function(err) {
+ 			console.log(err)
+ 		}
+    });
+});
+
+//获取学生ID
+$('#s_btn').on('click',function(){
+	var userName = $('#s_sID').val();
+	$.ajax({
+     	url: domain + 'queryByUser?user_name='+userName,
+     	type: 'GET',
+     	success: function(res) {
+ 			console.log(res);
+ 			if(res.length == 0){
+ 				$('.sId').show().text('你输入的用户不存在，请重新输入！')
+ 			}else{
+ 				$('.sId').show().text('t_id:'+res[0].id )
+ 			}
+ 		},
+ 		error: function(err) {
+ 			console.log(err)
+ 		}
+    });
+});
+
+//获取老师ID
+$('#t_btn').on('click',function(){
+	var userName = $('#s_tID').val();
+	$.ajax({
+     	url: domain + 'queryByTeacher?user_name='+userName,
+     	type: 'GET',
+     	success: function(res) {
+ 			console.log(res);
+ 			if(res.length == 0){
+ 				$('.tId').show().text('你输入的用户不存在，请重新输入！')
+ 			}else{
+ 				$('.tId').show().text('s_id:'+res[0].id )
+ 			}
+ 		},
+ 		error: function(err) {
+ 			console.log(err)
+ 		}
+    });
+});
+
+function init(){
+	var _sId = $('#s_id').val(),
+		_tId = $('#t_id').val(),
+		_courseId = $('#course_id').val(),
+		_dateTime = $('#date_time').val(),
+		_startTime = $('#start_time').val().replace(/T/i,' '),
+		_endTime = $('#end_time').val().replace(/T/i,' ');
+	var postData = {
+	    "s_id": _sId,
+	    "t_id": _tId,
+	    "course_id": _courseId,
+	    "date_time": _dateTime,
+	    "start_time": _startTime,
+	    "end_time": _endTime
+		};
+	 
+	postData = (function(obj){ // 转成post需要的字符串.
+	    var str = "";
+	    for(var prop in obj){
+	        str += prop + "=" + obj[prop] + "&"
+	    }
+	    return str;
+	})(postData);
+	return postData;
+}
+	
+})
+</script>
+</html>
